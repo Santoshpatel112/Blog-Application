@@ -23,11 +23,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <TheamProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          {children}
+          </TheamProvider>
       </body>
     </html>
   );
