@@ -6,25 +6,35 @@ import { prisma } from "@/lib/prisma";
 import Image from "next/image";
 
 export async function TopArticles() {
-  const articles = await prisma.article.findMany({
-    orderBy: {
-      createAt: "desc",
-    },
-    include: {
-      comments: true,
-      author: {
-        select: {
-          name: true,
-          email: true,
-          imageURL: true,
+  try {
+    const articles = await prisma.article.findMany({
+      orderBy: {
+        createAt: "desc",
+      },
+      take: 3,
+      include: {
+        comments: true,
+        author: {
+          select: {
+            name: true,
+            email: true,
+            imageURL: true,
+          },
         },
       },
-    },
-  });
+    });
 
-  return (
-    <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-      {articles.slice(0, 3).map((article: any) => (
+    if (articles.length === 0) {
+      return (
+        <div className="text-center py-12">
+          <p className="text-gray-500 dark:text-gray-400">No articles found. Start by creating your first article!</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        {articles.map((article: any) => (
         <Card
           key={article.id}
           className={cn(
@@ -74,5 +84,13 @@ export async function TopArticles() {
         </Card>
       ))}
     </div>
-  );
+    );
+  } catch (error) {
+    console.error("Error fetching articles:", error);
+    return (
+      <div className="text-center py-12">
+        <p className="text-red-500">Failed to load articles. Please try again later.</p>
+      </div>
+    );
+  }
 }
