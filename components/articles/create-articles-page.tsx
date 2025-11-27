@@ -36,7 +36,7 @@ export function CreateArticlesPage() {
           <CardTitle className="text-2xl">Create New Article</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} action={action} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="title">Article Title</Label>
               <Input
@@ -104,7 +104,7 @@ export function CreateArticlesPage() {
             {formState.errors.formErrors && (
               <div className="dark:bg-transparent bg-red-100 p-2 border border-red-600">
                 <span className="font-medium text-sm text-red-500">
-                  {formState.errors.formErrors}
+                  {formState.errors.formErrors[0]}
                 </span>
               </div>
             )}

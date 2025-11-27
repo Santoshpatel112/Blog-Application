@@ -2,47 +2,42 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { z } from "zod";
 
-type FormState = {
+const createArticlesSchema = z.object({
+  title: z.string().min(3, "Title must be at least 3 characters").max(100),
+  category: z.string().min(3, "Category must be at least 3 characters").max(50),
+  content: z.string().min(10, "Content must be at least 10 characters"),
+  featuredImage: z.string().min(1, "Featured image is required"),
+});
+
+type createArticleFormstate = {
   errors: {
-    title?: string;
-    category?: string;
-    featuredImage?: string;
+    title?: string[];
+    category?: string[];
+    featuredImage?: string[];
     content?: string[];
-    formErrors?: string;
+    formErrors?: string[];
   };
 };
 
-export async function createArticles(
-  prevState: FormState,
+export const createArticles = async (
+  prev: createArticleFormstate,
   formData: FormData
-): Promise<FormState> {
-  const title = formData.get("title") as string;
-  const category = formData.get("category") as string;
-  const content = formData.get("content") as string;
-  const featuredImage = formData.get("featuredImage") as string;
+): Promise<createArticleFormstate> => {
+  // Validate
+  const result = createArticlesSchema.safeParse({
+    title: formData.get("title"),
+    category: formData.get("category"),
+    content: formData.get("content"),
+    featuredImage: formData.get("featuredImage"),
+  });
 
-  const errors: FormState["errors"] = {};
-
-  // Validation
-  if (!title || title.trim().length === 0) {
-    errors.title = "Title is required";
-  }
-
-  if (!category || category.trim().length === 0) {
-    errors.category = "Category is required";
-  }
-
-  if (!content || content.trim().length === 0) {
-    errors.content = ["Content is required"];
-  }
-
-  if (!featuredImage || featuredImage.trim().length === 0) {
-    errors.featuredImage = "Featured image is required";
-  }
-
-  if (Object.keys(errors).length > 0) {
-    return { errors };
+  if (!result.success) {
+    return {
+      errors: result.error.flatten().fieldErrors,
+    };
   }
 
   try {
@@ -52,31 +47,31 @@ export async function createArticles(
     if (!firstUser) {
       return {
         errors: {
-          formErrors: "No user found. Please create a user first.",
+          formErrors: ["No user found. Please create a user first."],
         },
       };
     }
 
     await prisma.article.create({
       data: {
-        title,
-        category,
-        content,
-        featuredImage,
+        title: result.data.title,
+        category: result.data.category,
+        content: result.data.content,
+        featuredImage: result.data.featuredImage,
         authorId: firstUser.id,
       },
     });
 
     revalidatePath("/");
-    revalidatePath("/articles");
-
-    return { errors: {} };
+    revalidatePath("/dashboard");
   } catch (error) {
     console.error("Error creating article:", error);
     return {
       errors: {
-        formErrors: "Failed to create article. Please try again.",
+        formErrors: ["Failed to create article. Please try again."],
       },
     };
   }
-}
+
+  redirect("/dashboard");
+};
