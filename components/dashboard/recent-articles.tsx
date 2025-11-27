@@ -15,14 +15,14 @@ import type { Prisma } from "@prisma/client";
 import { deleteArticle } from "@/actions/delete-article";
 
 type RecentArticlesProps = {
-  articles: Prisma.ArticlesGetPayload<{
+  articles: Prisma.ArticleGetPayload<{
     include: {
       comments: true;
       author: {
         select: {
           name: true;
           email: true;
-          imageUrl: true;
+          imageURL: true;
         };
       };
     };
@@ -65,7 +65,11 @@ const RecentArticles: React.FC<RecentArticlesProps> = ({ articles }) => {
                   </TableCell>
                   <TableCell>{article.comments.length}</TableCell>
                   <TableCell>
-                    {new Date(article.createdAt).toDateString()}
+                    {new Date(article.createAt).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric'
+                    })}
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">

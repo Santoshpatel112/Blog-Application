@@ -26,7 +26,7 @@ export function CreateArticlesPage() {
     // Wrap the action call in startTransition
     startTransition(() => {
       action(formData);
-    });
+    }); 
   };
 
   return (
@@ -36,7 +36,7 @@ export function CreateArticlesPage() {
           <CardTitle className="text-2xl">Create New Article</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} action={action} className="space-y-6">
+          <form onSubmit={handleSubmit}  className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="title">Article Title</Label>
               <Input
