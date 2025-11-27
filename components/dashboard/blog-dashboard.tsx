@@ -7,9 +7,9 @@ import Link from "next/link";
 
 export async function BlogDashboard() {
   const [articles, totalComments] = await Promise.all([
-    prisma.articles.findMany({
+    prisma.article.findMany({
       orderBy: {
-        createdAt: "desc",
+        createAt: "desc",
       },
       include: {
         comments: true,
@@ -17,7 +17,7 @@ export async function BlogDashboard() {
           select: {
             name: true,
             email: true,
-            imageUrl: true,
+            imageURL: true,
           },
         },
       },
@@ -35,7 +35,7 @@ export async function BlogDashboard() {
             Manage your content and analytics
           </p>
         </div>
-        <Link href={"/dashboard/articles/create"}>
+        <Link href={"/dashboard/article/create"}>
           <Button className="gap-2">
             <PlusCircle className="h-4 w-4" />
             New Article

@@ -87,7 +87,14 @@ export function CreateArticlesPage() {
 
             <div className="space-y-2">
               <Label>Content</Label>
-              <ReactQuill theme="snow" value={content} onChange={setContent} />
+              <div className="min-h-[300px]">
+                <ReactQuill 
+                  theme="snow" 
+                  value={content} 
+                  onChange={setContent}
+                  className="h-64"
+                />
+              </div>
               {formState.errors.content && (
                 <span className="font-medium text-sm text-red-500">
                   {formState.errors.content[0]}
