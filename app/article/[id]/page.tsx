@@ -30,15 +30,24 @@ const page: React.FC<ArticleDetailPageProps> = async ({ params }) => {
     return <h1>Article not found.</h1>;
   }
 
-  // Fetch likes for this article
-  const likes = await prisma.like.findMany({
-    where: {
-      articleId: id,
-    },
-  });
+  // Fetch likes and saved articles for this article
+  const [likes, savedArticles] = await Promise.all([
+    prisma.like.findMany({
+      where: {
+        articleId: id,
+      },
+    }),
+    prisma.savedArticle.findMany({
+      where: {
+        articleId: id,
+      },
+    }),
+  ]);
 
-  // Check if current user has liked this article
+  // Check if current user has liked and saved this article
   let isLiked = false;
+  let isSaved = false;
+  
   if (userId) {
     const user = await prisma.user.findUnique({
       where: {
@@ -48,12 +57,19 @@ const page: React.FC<ArticleDetailPageProps> = async ({ params }) => {
     
     if (user) {
       isLiked = likes.some((like) => like.userId === user.id);
+      isSaved = savedArticles.some((saved) => saved.userId === user.id);
     }
   }
 
   return (
     <div>
-      <ArticleDetailPage article={article} likes={likes} isLiked={isLiked} />
+      <ArticleDetailPage 
+        article={article} 
+        likes={likes} 
+        isLiked={isLiked}
+        savedArticles={savedArticles}
+        isSaved={isSaved}
+      />
     </div>
   );
 };
