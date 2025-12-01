@@ -1,6 +1,7 @@
 import EditArticlePage from "@/components/articles/edit-article-page";
 import { prisma } from "@/lib/prisma";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -8,6 +9,22 @@ type PageProps = {
 
 const Page = async ({ params }: PageProps) => {
   const { id } = await params;
+  const { userId } = await auth();
+
+  if (!userId) {
+    redirect("/");
+  }
+
+  // Get the current user
+  const currentUser = await prisma.user.findUnique({
+    where: {
+      clearkUserId: userId,
+    },
+  });
+
+  if (!currentUser) {
+    redirect("/");
+  }
 
   const article = await prisma.article.findUnique({
     where: { id },
@@ -17,11 +34,17 @@ const Page = async ({ params }: PageProps) => {
       category: true,
       content: true,
       featuredImage: true,
+      authorId: true,
     },
   });
 
   if (!article) {
     notFound();
+  }
+
+  // Check if the user is the author of the article
+  if (article.authorId !== currentUser.id) {
+    redirect("/dashboard");
   }
 
   return <EditArticlePage article={article} />;

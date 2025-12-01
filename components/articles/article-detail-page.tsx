@@ -1,11 +1,12 @@
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Calendar, Clock, MessageCircle } from "lucide-react";
-import { Prisma } from "@prisma/client";
+import { Prisma, Like } from "@prisma/client";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import CommentForm from "@/components/comments/comment-input";
 import CommentList from "@/components/comments/comments-list";
+import LikeButton from "@/components/articles/like-button";
 
 type ArticleDetailPageProps = {
   article: Prisma.ArticleGetPayload<{
@@ -19,9 +20,11 @@ type ArticleDetailPageProps = {
       };
     };
   }>;
+  likes: Like[];
+  isLiked: boolean;
 };
 
-export async function ArticleDetailPage({ article }: ArticleDetailPageProps) {
+export async function ArticleDetailPage({ article, likes, isLiked }: ArticleDetailPageProps) {
   // Fetch comments for this article
   const comments = await prisma.comment.findMany({
     where: {
@@ -106,6 +109,11 @@ export async function ArticleDetailPage({ article }: ArticleDetailPageProps) {
               dangerouslySetInnerHTML={{ __html: article.content }}
             />
           </Card>
+
+          {/* Like Button Section */}
+          <div className="mb-8">
+            <LikeButton articleId={article.id} likes={likes} isLiked={isLiked} />
+          </div>
 
           {/* Comments Section */}
           <Card className="p-6">

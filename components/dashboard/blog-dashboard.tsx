@@ -4,10 +4,47 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import RecentArticles from "./recent-articles";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { auth, currentUser } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
 export async function BlogDashboard() {
+  const { userId } = await auth();
+  
+  if (!userId) {
+    redirect("/");
+  }
+
+  // Get the current user from database, or create if doesn't exist
+  let dbUser = await prisma.user.findUnique({
+    where: {
+      clearkUserId: userId,
+    },
+  });
+
+  // If user doesn't exist in database, create them
+  if (!dbUser) {
+    const clerkUser = await currentUser();
+    
+    if (clerkUser) {
+      dbUser = await prisma.user.create({
+        data: {
+          clearkUserId: userId,
+          name: `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim() || "User",
+          email: clerkUser.emailAddresses[0]?.emailAddress || "",
+          imageURL: clerkUser.imageUrl || "",
+        },
+      });
+    } else {
+      redirect("/");
+    }
+  }
+
+  // Fetch only articles created by the logged-in user
   const [articles, totalComments] = await Promise.all([
     prisma.article.findMany({
+      where: {
+        authorId: dbUser.id,
+      },
       orderBy: {
         createAt: "desc",
       },
@@ -22,7 +59,13 @@ export async function BlogDashboard() {
         },
       },
     }),
-    prisma.comment.count(),
+    prisma.comment.count({
+      where: {
+        article: {
+          authorId: dbUser.id,
+        },
+      },
+    }),
   ]);
 
   return (

@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { v2 as cloudinary } from "cloudinary";
+import { auth } from "@clerk/nextjs/server";
 
 cloudinary.config({
   cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
@@ -12,14 +13,39 @@ cloudinary.config({
 
 export async function deleteArticle(articleId: string) {
   try {
-    // Get article to extract image URL
+    const { userId } = await auth();
+    
+    if (!userId) {
+      return { success: false, error: "You must be logged in to delete articles" };
+    }
+
+    // Get the current user
+    const currentUser = await prisma.user.findUnique({
+      where: {
+        clearkUserId: userId,
+      },
+    });
+
+    if (!currentUser) {
+      return { success: false, error: "User not found" };
+    }
+
+    // Get article to check ownership and extract image URL
     const article = await prisma.article.findUnique({
       where: { id: articleId },
-      select: { featuredImage: true },
+      select: { 
+        featuredImage: true,
+        authorId: true,
+      },
     });
 
     if (!article) {
       return { success: false, error: "Article not found" };
+    }
+
+    // Check if the user is the author of the article
+    if (article.authorId !== currentUser.id) {
+      return { success: false, error: "You are not authorized to delete this article" };
     }
 
     // Delete article and related data (comments, likes will be deleted due to cascade)

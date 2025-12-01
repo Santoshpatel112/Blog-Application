@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { v2 as cloudinary, UploadApiResponse } from "cloudinary";
+import { auth } from "@clerk/nextjs/server";
 
 cloudinary.config({
   cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
@@ -33,6 +34,54 @@ export const editArticle = async (
   prev: editArticleFormstate,
   formData: FormData
 ): Promise<editArticleFormstate> => {
+  // Check authentication
+  const { userId } = await auth();
+  
+  if (!userId) {
+    return {
+      errors: {
+        formErrors: ["You must be logged in to edit articles"],
+      },
+    };
+  }
+
+  // Get the current user
+  const currentUser = await prisma.user.findUnique({
+    where: {
+      clearkUserId: userId,
+    },
+  });
+
+  if (!currentUser) {
+    return {
+      errors: {
+        formErrors: ["User not found"],
+      },
+    };
+  }
+
+  // Check if the user is the author of the article
+  const article = await prisma.article.findUnique({
+    where: { id: articleId },
+    select: { authorId: true },
+  });
+
+  if (!article) {
+    return {
+      errors: {
+        formErrors: ["Article not found"],
+      },
+    };
+  }
+
+  if (article.authorId !== currentUser.id) {
+    return {
+      errors: {
+        formErrors: ["You are not authorized to edit this article"],
+      },
+    };
+  }
+
   // Validate text fields
   const result = editArticlesSchema.safeParse({
     title: formData.get("title"),
