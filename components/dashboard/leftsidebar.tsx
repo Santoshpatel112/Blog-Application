@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   MessageCircle,
   Settings,
+  Bookmark,
 } from "lucide-react";
 import Link from "next/link";
 const Sidebar = () => {
@@ -65,6 +66,18 @@ function DashboardSidebar({ closeSheet }: { closeSheet?: () => void }) {
             Articles
           </Button>
         </Link>
+
+        <Link href={"/dashboard/saved"}>
+          <Button
+            variant="ghost"
+            className="w-full justify-start"
+            onClick={closeSheet}
+          >
+            <Bookmark className="mr-2 h-4 w-4" />
+            Saved Articles
+          </Button>
+        </Link>
+
         <Button
           variant="ghost"
           className="w-full justify-start"
@@ -73,14 +86,16 @@ function DashboardSidebar({ closeSheet }: { closeSheet?: () => void }) {
           <MessageCircle className="mr-2 h-4 w-4" />
           Comments
         </Button>
-        <Button
-          variant="ghost"
-          className="w-full justify-start"
-          onClick={closeSheet}
-        >
-          <BarChart className="mr-2 h-4 w-4" />
-          Analytics
-        </Button>
+        <Link href={"/dashboard/analytics"}>
+          <Button
+            variant="ghost"
+            className="w-full justify-start"
+            onClick={closeSheet}
+          >
+            <BarChart className="mr-2 h-4 w-4" />
+            Analytics
+          </Button>
+        </Link>
         <Button
           variant="ghost"
           className="w-full justify-start"
