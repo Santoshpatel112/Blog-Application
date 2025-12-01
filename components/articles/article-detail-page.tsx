@@ -1,8 +1,11 @@
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, Clock } from "lucide-react";
+import { Calendar, Clock, MessageCircle } from "lucide-react";
 import { Prisma } from "@prisma/client";
 import Image from "next/image";
+import { prisma } from "@/lib/prisma";
+import CommentForm from "@/components/comments/comment-input";
+import CommentList from "@/components/comments/comments-list";
 
 type ArticleDetailPageProps = {
   article: Prisma.ArticleGetPayload<{
@@ -18,7 +21,26 @@ type ArticleDetailPageProps = {
   }>;
 };
 
-export function ArticleDetailPage({ article }: ArticleDetailPageProps) {
+export async function ArticleDetailPage({ article }: ArticleDetailPageProps) {
+  // Fetch comments for this article
+  const comments = await prisma.comment.findMany({
+    where: {
+      articleId: article.id,
+    },
+    include: {
+      user: {
+        select: {
+          name: true,
+          email: true,
+          imageURL: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
   return (
     <div className="min-h-screen bg-background">
       <main className="container mx-auto px-4 py-12 sm:px-6 lg:px-8">
@@ -83,6 +105,22 @@ export function ArticleDetailPage({ article }: ArticleDetailPageProps) {
               className="prose prose-lg dark:prose-invert max-w-none"
               dangerouslySetInnerHTML={{ __html: article.content }}
             />
+          </Card>
+
+          {/* Comments Section */}
+          <Card className="p-6">
+            <div className="flex items-center gap-2 mb-8">
+              <MessageCircle className="h-6 w-6 text-primary" />
+              <h2 className="text-2xl font-semibold text-foreground">
+                {comments.length} {comments.length === 1 ? "Comment" : "Comments"}
+              </h2>
+            </div>
+
+            {/* Comment Form */}
+            <CommentForm articleId={article.id} />
+
+            {/* Comments List */}
+            <CommentList comments={comments} />
           </Card>
         </article>
       </main>
