@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { v2 as cloudinary, UploadApiResponse } from "cloudinary";
+import { auth, currentUser } from "@clerk/nextjs/server";
 
 cloudinary.config({
   cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
@@ -100,14 +101,46 @@ export const createArticles = async (
 
   // Create article in database
   try {
-    const existingUser = await prisma.user.findFirst();
+    // Get current user from Clerk
+    const { userId } = await auth();
+    
+    let existingUser;
 
+    if (userId) {
+      // Find or create user in database
+      existingUser = await prisma.user.findUnique({
+        where: { clearkUserId: userId },
+      });
+
+      if (!existingUser) {
+        // Get user details from Clerk
+        const clerkUser = await currentUser();
+        
+        if (clerkUser) {
+          // Create user in database
+          existingUser = await prisma.user.create({
+            data: {
+              clearkUserId: userId,
+              name: `${clerkUser.firstName} ${clerkUser.lastName}`,
+              email: clerkUser.emailAddresses[0]?.emailAddress || "",
+              imageURL: clerkUser.imageUrl || "",
+            },
+          });
+        }
+      }
+    }
+
+    // Fallback to first user if Clerk auth not available
     if (!existingUser) {
-      return {
-        errors: {
-          formErrors: ["No user found. Please create a user first."],
-        },
-      };
+      existingUser = await prisma.user.findFirst();
+      
+      if (!existingUser) {
+        return {
+          errors: {
+            formErrors: ["No user found. Please ensure you're logged in."],
+          },
+        };
+      }
     }
 
     await prisma.article.create({
@@ -124,9 +157,10 @@ export const createArticles = async (
     revalidatePath("/dashboard");
   } catch (error) {
     console.error("Error creating article:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return {
       errors: {
-        formErrors: ["Failed to create article. Please try again."],
+        formErrors: [`Failed to create article: ${errorMessage}`],
       },
     };
   }

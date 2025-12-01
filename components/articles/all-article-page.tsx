@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"; 
 import { Search } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { Prisma } from "@prisma/client";
 
 type SearchPageProps = {
@@ -25,11 +26,9 @@ export function AllArticlesPage({ articles }: SearchPageProps) {
   return (
     <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
       {articles.map((article) => (
-        <Card
-          key={article.id}
-          className="group relative overflow-hidden transition-all hover:shadow-lg"
-        >
-          <div className="p-6">
+        <Link key={article.id} href={`/article/${article.id}`}>
+          <Card className="group relative overflow-hidden transition-all hover:shadow-xl hover:scale-[1.02] cursor-pointer h-full">
+            <div className="p-6">
             {/* Image Container */}
             <div className="relative mb-4 h-48 w-full overflow-hidden rounded-xl">
               <Image
@@ -61,7 +60,8 @@ export function AllArticlesPage({ articles }: SearchPageProps) {
               </div>
             </div>
           </div>
-        </Card>
+          </Card>
+        </Link>
       ))}
     </div>
   );
