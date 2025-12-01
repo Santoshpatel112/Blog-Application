@@ -40,7 +40,7 @@ export function BlogFooter() {
             <ul className="space-y-3">
               <li>
                 <a
-                  href="#"
+                  href="/article"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   All Articles

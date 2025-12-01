@@ -28,7 +28,7 @@ const Navbar = () => {
           {/* DeskTop menu */}
           <div className="hidden md:flex items-center gap-4">
             <Link
-              href={"/articles"}
+              href={"/article"}
               className="text-sm font-medium hover:text-primary/80 transition "
             >
               Articles
@@ -100,7 +100,7 @@ const Navbar = () => {
           {/* Mobile Navigation Links */}
           <div className="space-y-2 px-4">
             <Link
-              href="/articles"
+              href="/article"
               className="block px-3 py-2 text-base font-medium text-foreground"
               onClick={() => setIsMobileMenuOpen(false)}
             >
