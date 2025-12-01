@@ -28,7 +28,7 @@ export default function Home() {
           </Suspense>
 
           <div className="mt-12 text-center">
-            <Link href={"/articles"}>
+            <Link href={"/article"}>
               <Button
                 variant="outline"
                 className="rounded-full px-8 py-6 text-lg hover:bg-gray-900 hover:text-white dark:hover:bg-white dark:hover:text-gray-900"

@@ -44,7 +44,7 @@ export async function TopArticles() {
           )}
         >   
           <div className="p-6">
-            <Link href={`/articles/${article.id}`}>
+            <Link href={`/article/${article.id}`}>
               {/* Image Container */}
               <div className="relative mb-4 h-48 w-full overflow-hidden rounded-xl">
                 <Image

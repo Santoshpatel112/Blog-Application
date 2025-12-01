@@ -55,7 +55,7 @@ function DashboardSidebar({ closeSheet }: { closeSheet?: () => void }) {
           </Button>
         </Link>
 
-        <Link href={"/dashboard/articles/create"}>
+        <Link href={"/dashboard/article/create"}>
           <Button
             variant="ghost"
             className="w-full justify-start"
