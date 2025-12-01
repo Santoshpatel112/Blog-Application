@@ -2,6 +2,9 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Calendar, Clock, MessageCircle } from "lucide-react";
 import { Prisma, Like } from "@prisma/client";
+
+// @ts-ignore - SavedArticle will be available after Prisma generation
+type SavedArticle = any;
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import CommentForm from "@/components/comments/comment-input";
@@ -22,9 +25,17 @@ type ArticleDetailPageProps = {
   }>;
   likes: Like[];
   isLiked: boolean;
+  savedArticles: SavedArticle[];
+  isSaved: boolean;
 };
 
-export async function ArticleDetailPage({ article, likes, isLiked }: ArticleDetailPageProps) {
+export async function ArticleDetailPage({ 
+  article, 
+  likes, 
+  isLiked, 
+  savedArticles, 
+  isSaved 
+}: ArticleDetailPageProps) {
   // Fetch comments for this article
   const comments = await prisma.comment.findMany({
     where: {
@@ -112,7 +123,13 @@ export async function ArticleDetailPage({ article, likes, isLiked }: ArticleDeta
 
           {/* Like Button Section */}
           <div className="mb-8">
-            <LikeButton articleId={article.id} likes={likes} isLiked={isLiked} />
+            <LikeButton 
+              articleId={article.id} 
+              likes={likes} 
+              isLiked={isLiked}
+              savedArticles={savedArticles}
+              isSaved={isSaved}
+            />
           </div>
 
           {/* Comments Section */}
