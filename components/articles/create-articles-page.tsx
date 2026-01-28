@@ -35,7 +35,7 @@ export function CreateArticlesPage() {
           <CardTitle className="text-2xl">Create New Article</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit}  className="space-y-6">
+          <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="title">Article Title</Label>
               <Input
