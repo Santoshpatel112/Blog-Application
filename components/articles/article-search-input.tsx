@@ -9,9 +9,10 @@ import React from "react";
 const ArticleSearchInput = () => {
   const searchParams = useSearchParams();
   const searchText = searchParams.get("search") || "";
-  const handleSearchaction=async(e:React.FormEvent)=>{
+  const handleSearchaction=async(e:React.FormEvent<HTMLFormElement>)=>{
     e.preventDefault();
-    await searchAction(searchParams.get("search") || "");
+    const formData = new FormData(e.currentTarget);
+    await searchAction(formData);
 
   }
  

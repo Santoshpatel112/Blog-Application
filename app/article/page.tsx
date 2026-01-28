@@ -56,7 +56,7 @@ const page = async ({ searchParams }: SearchPageProps) => {
 
           {/* Search Bar */}
           <div className="max-w-2xl mx-auto">
-            <Suspense>
+            <Suspense fallback={<div>Loading...</div>}>
               <ArticleSearchInput />
             </Suspense>
           </div>

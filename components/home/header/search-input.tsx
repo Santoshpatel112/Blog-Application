@@ -7,9 +7,10 @@ import React from "react";
 
 const SearchInput = () => {
   const params = useSearchParams();
-  const handleSearchaction=async (e:React.FocusEvent)=>{
+  const handleSearchaction=async (e:React.FormEvent<HTMLFormElement>)=>{
     e.preventDefault();
-    await searchAction(searchparam.get("search") ||"")
+    const formData = new FormData(e.currentTarget);
+    await searchAction(formData);
   }
   return (
     <form onSubmit={handleSearchaction}>

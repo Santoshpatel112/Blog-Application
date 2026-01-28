@@ -1,5 +1,5 @@
 'use client'
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import ToggleMode from "./toggel-mode";
 import { Menu, X, Search } from "lucide-react";
 import { SignedIn } from "@clerk/nextjs";
 import { SignedOut, SignUpButton ,SignInButton ,UserButton} from "@clerk/clerk-react";
+
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] =useState(false);
   return (
@@ -49,7 +50,9 @@ const Navbar = () => {
           </div>
           {/* Right Section */}
           <div className="flex items-center gap-4">
-            <SearchInput />
+            <Suspense fallback={<div></div>}>
+               <SearchInput />
+            </Suspense>
             <ToggleMode />
             <SignedIn>
               <UserButton />
