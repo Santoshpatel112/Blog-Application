@@ -4,10 +4,26 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import Image from "next/image";
+import { Prisma } from "@prisma/client";
+
+type ArticleWithRelations = Prisma.ArticleGetPayload<{
+  include: {
+    comments: true;
+    author: {
+      select: {
+        name: true;
+        email: true;
+        imageURL: true;
+      };
+    };
+  };
+}>;
 
 export async function TopArticles() {
+  let articles: ArticleWithRelations[] = [];
+  
   try {
-    const articles = await prisma.article.findMany({
+    articles = await prisma.article.findMany({
       orderBy: {
         createAt: "desc",
       },
@@ -23,18 +39,26 @@ export async function TopArticles() {
         },
       },
     });
-
-    if (articles.length === 0) {
-      return (
-        <div className="text-center py-12">
-          <p className="text-gray-500 dark:text-gray-400">No articles found. Start by creating your first article!</p>
-        </div>
-      );
-    }
-
+  } catch (error) {
+    console.error("Error fetching articles:", error);
     return (
-      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {articles.map((article: any) => (
+      <div className="text-center py-12">
+        <p className="text-red-500">Failed to load articles. Please try again later.</p>
+      </div>
+    );
+  }
+
+  if (articles.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500 dark:text-gray-400">No articles found. Start by creating your first article!</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      {articles.map((article) => (
         <Card
           key={article.id}
           className={cn(
@@ -42,7 +66,7 @@ export async function TopArticles() {
             "border border-gray-200/50 dark:border-white/10",
             "bg-white/50 dark:bg-gray-900/50 backdrop-blur-lg"
           )}
-        >   
+        >
           <div className="p-6">
             <Link href={`/article/${article.id}`}>
               {/* Image Container */}
@@ -84,13 +108,5 @@ export async function TopArticles() {
         </Card>
       ))}
     </div>
-    );
-  } catch (error) {
-    console.error("Error fetching articles:", error);
-    return (
-      <div className="text-center py-12">
-        <p className="text-red-500">Failed to load articles. Please try again later.</p>
-      </div>
-    );
-  }
+  );
 }

@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 
 export async function fetchArticleByQuery(
   searchText: string,
@@ -9,7 +10,7 @@ export async function fetchArticleByQuery(
   category?: string
 ) {
   try {
-    const where: any = {};
+    const where: Prisma.ArticleWhereInput = {};
 
     // Add search filter
     if (searchText) {
