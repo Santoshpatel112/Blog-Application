@@ -1,5 +1,5 @@
 "use client";
-import { FormEvent, startTransition, useActionState, useState } from "react";
+import { FormEvent, startTransition, useActionState, useState, useEffect } from "react";
 import "react-quill-new/dist/quill.snow.css";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,11 @@ type EditArticlePageProps = {
 export default function EditArticlePage({ article }: EditArticlePageProps) {
   const [content, setContent] = useState(article.content);
   const [previewImage, setPreviewImage] = useState<string>(article.featuredImage);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const editArticleWithId = editArticle.bind(null, article.id);
 
@@ -60,7 +65,7 @@ export default function EditArticlePage({ article }: EditArticlePageProps) {
           <CardTitle className="text-2xl">Edit Article</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6" encType="multipart/form-data">
             <div className="space-y-2">
               <Label htmlFor="title">Article Title</Label>
               <Input
@@ -128,12 +133,16 @@ export default function EditArticlePage({ article }: EditArticlePageProps) {
             <div className="space-y-2">
               <Label>Content</Label>
               <div className="min-h-[300px]">
-                <ReactQuill
-                  theme="snow"
-                  value={content}
-                  onChange={setContent}
-                  className="h-64"
-                />
+                {mounted ? (
+                  <ReactQuill
+                    theme="snow"
+                    value={content}
+                    onChange={setContent}
+                    className="h-64"
+                  />
+                ) : (
+                  <div className="h-64 border rounded-md bg-muted/50 animate-pulse" />
+                )}
               </div>
               {formState.errors.content && (
                 <span className="font-medium text-sm text-red-500">

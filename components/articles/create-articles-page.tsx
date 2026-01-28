@@ -1,5 +1,5 @@
 "use client";
-import { FormEvent, startTransition, useActionState, useState } from "react";
+import { FormEvent, startTransition, useActionState, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +11,11 @@ const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
 export function CreateArticlesPage() {
   const [content, setContent] = useState("");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const [formState, action, isPending] = useActionState(createArticles, {
     errors: {},
@@ -87,12 +92,16 @@ export function CreateArticlesPage() {
             <div className="space-y-2">
               <Label>Content</Label>
               <div className="min-h-[300px]">
-                <ReactQuill 
-                  theme="snow" 
-                  value={content} 
-                  onChange={setContent}
-                  className="h-64"
-                />
+                {mounted ? (
+                  <ReactQuill 
+                    theme="snow" 
+                    value={content} 
+                    onChange={setContent}
+                    className="h-64"
+                  />
+                ) : (
+                  <div className="h-64 border rounded-md bg-muted/50 animate-pulse" />
+                )}
               </div>
               {formState.errors.content && (
                 <span className="font-medium text-sm text-red-500">
